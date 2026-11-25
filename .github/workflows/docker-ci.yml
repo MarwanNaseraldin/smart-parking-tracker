@@ -1,0 +1,46 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Convert repository owner to lowercase
+        run: echo "REPO_OWNER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry (ghcr.io)
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Web Dashboard Image
+        run: |
+          docker build -t ghcr.io/${{ env.REPO_OWNER }}/smart-parking-web:latest -t ghcr.io/${{ env.REPO_OWNER }}/smart-parking-web:${{ github.sha }} ./web
+          if [ "${{ github.event_name }}" == "push" ]; then
+            docker push ghcr.io/${{ env.REPO_OWNER }}/smart-parking-web:latest
+            docker push ghcr.io/${{ env.REPO_OWNER }}/smart-parking-web:${{ github.sha }}
+          fi
+
+      - name: Build and Push Storage Server Image
+        run: |
+          docker build -t ghcr.io/${{ env.REPO_OWNER }}/smart-parking-storage:latest -t ghcr.io/${{ env.REPO_OWNER }}/smart-parking-storage:${{ github.sha }} ./storage
+          if [ "${{ github.event_name }}" == "push" ]; then
+            docker push ghcr.io/${{ env.REPO_OWNER }}/smart-parking-storage:latest
+            docker push ghcr.io/${{ env.REPO_OWNER }}/smart-parking-storage:${{ github.sha }}
+          fi

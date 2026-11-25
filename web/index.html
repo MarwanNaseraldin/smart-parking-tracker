@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart VIP Parking Tracker</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --accent: #38bdf8;
+    }
+    body.light {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --accent: #0284c7;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      transition: 0.3s;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .controls button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 14px;
+    }
+    .btn-theme { background: #64748b; color: white; }
+    .btn-gate { background: #ef4444; color: white; }
+    .btn-gate.open { background: #22c55e; }
+    .btn-scan { background: var(--accent); color: #0f172a; }
+    .status-bar {
+      margin: 20px 0;
+      padding: 15px;
+      background: var(--card);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .alert {
+      display: none;
+      background: #dc2626;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.6; } }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .car-card {
+      background: var(--card);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .car-card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🛡️ חניון VIP חכם - עמדת שומר</h1>
+    <div class="controls">
+      <button class="btn-scan" onclick="loadNewCar()">📸 סרוק רכב חדש (vip3)</button>
+      <button id="gateBtn" class="btn-gate" onclick="toggleGate()">שער: סגור 🔒</button>
+      <button class="btn-theme" onclick="toggleTheme()">🌓 מצב יום/לילה</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div>תפוסה בחניון: <span id="count">2</span> / 3 מקומות VIP</div>
+    <div>שרת אחסון (Apache): <span style="color:#22c55e;">מחובר ●</span></div>
+  </div>
+
+  <div id="fullAlert" class="alert">⚠️ התראה: חניון ה-VIP הגיע לתפוסה מלאה (3/3)! אין להכניס רכבים נוספים!</div>
+
+  <div class="grid" id="carsGrid">
+    <div class="car-card">
+      <h3>כניסה #1</h3>
+      <img src="http://localhost:8081/images/vip1.svg" alt="רכב 1">
+    </div>
+    <div class="car-card">
+      <h3>כניסה #2</h3>
+      <img src="http://localhost:8081/images/vip2.svg" alt="רכב 2">
+    </div>
+  </div>
+
+  <script>
+    let gateOpen = false;
+    let thirdCarLoaded = false;
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    function toggleGate() {
+      gateOpen = !gateOpen;
+      const btn = document.getElementById('gateBtn');
+      if (gateOpen) {
+        btn.textContent = 'שער: פתוח 🟢';
+        btn.classList.add('open');
+      } else {
+        btn.textContent = 'שער: סגור 🔒';
+        btn.classList.remove('open');
+      }
+    }
+
+    function loadNewCar() {
+      if (thirdCarLoaded) return;
+      const grid = document.getElementById('carsGrid');
+      const card = document.createElement('div');
+      card.className = 'car-card';
+      card.innerHTML = `
+        <h3>כניסה #3 (חדש מה-Volume!)</h3>
+        <img src="http://localhost:8081/images/vip3.svg" alt="רכב 3" onerror="this.alt='הקובץ vip3.svg עדיין לא הועלה ל-Volume בשרת Storage!'">
+      `;
+      grid.appendChild(card);
+      thirdCarLoaded = true;
+      document.getElementById('count').textContent = '3';
+      document.getElementById('fullAlert').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

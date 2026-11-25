@@ -1,0 +1,26 @@
+services:
+  web-dashboard:
+    build: ./web
+    container_name: parking-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - storage-server
+    networks:
+      - parking-net
+
+  storage-server:
+    build: ./storage
+    container_name: parking-storage
+    ports:
+      - "8081:80"
+    volumes:
+      - parking_images:/usr/local/apache2/htdocs/images
+    networks:
+      - parking-net
+
+volumes:
+  parking_images:
+
+networks:
+  parking-net:
